@@ -53,4 +53,13 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // Permission
+    implementation(libs.accompanist.permissions)
+
+    // CameraX
+    implementation(libs.bundles.androidx.camera)
+
+    // Coil hỗ trợ hiển thị/render Bitmap trong Compose (tuỳ chọn nhưng rất hữu ích)
+    implementation(libs.coil.compose)
 }
