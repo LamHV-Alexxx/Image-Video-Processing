@@ -25,22 +25,26 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import java.util.concurrent.Executors
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asExecutor
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun CameraPreviewScreen() {
     val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
 
     // State lưu giữ bitmap nhận được từ ImageAnalysis để hiển thị
     var processedBitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -64,9 +68,6 @@ fun CameraPreviewScreen() {
                             it.surfaceProvider = previewView.surfaceProvider
                         }
 
-                    // Executor riêng cho việc phân tích ảnh (tránh làm lag UI Thread)
-                    val analyzerExecutor = Executors.newSingleThreadExecutor()
-
                     // Biến tính FPS
                     var lastFrameTimestamp = System.currentTimeMillis()
 
@@ -76,7 +77,11 @@ fun CameraPreviewScreen() {
                         .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_YUV_420_888)
                         .build()
 
-                    imageAnalysis.setAnalyzer(analyzerExecutor) { imageProxy ->
+                    // Chuyển Dispatcher.Default thành Executor cho CameraX
+                    // CameraX sẽ đẩy công việc phân tích vào Dispatcher.Default (Thread pool CPU)
+                    val backgroundExecutor = Dispatchers.Default.asExecutor()
+
+                    imageAnalysis.setAnalyzer(backgroundExecutor) { imageProxy ->
                         // Tính FPS
                         val currentTimestamp = System.currentTimeMillis()
                         val deltaTime = currentTimestamp - lastFrameTimestamp
@@ -86,18 +91,24 @@ fun CameraPreviewScreen() {
                         }
                         lastFrameTimestamp = currentTimestamp
 
-                        // Xử lý biến đổi ImageProxy -> Bitmap
-                        val bitmap = imageProxy.toBitmap()
-                        val rotatedBitmap = rotateBitmap(bitmap, imageProxy.imageInfo.rotationDegrees)
+                        coroutineScope.launch(Dispatchers.Default) {
+                            try {
+                                // Xử lý biến đổi ImageProxy -> Bitmap
+                                val bitmap = imageProxy.toBitmap()
+                                val rotatedBitmap = rotateBitmap(bitmap, imageProxy.imageInfo.rotationDegrees)
 
-                        // Thực hiện logic xử lý ảnh
-                        val finalProcessedBitmap = processMyImage(rotatedBitmap)
+                                // Thực hiện logic xử lý ảnh
+                                val finalProcessedBitmap = processMyImage(rotatedBitmap)
 
-                        // Đẩy bitmap đã xử lý lên Main Thread để cập nhật Compose state
-                        processedBitmap = finalProcessedBitmap
-
-                        // Giải phóng (BẮT BUỘC)
-                        imageProxy.close()
+                                // Đẩy bitmap đã xử lý lên Main Thread để cập nhật Compose state
+                                withContext(Dispatchers.Main) {
+                                    processedBitmap = finalProcessedBitmap
+                                }
+                            } finally {
+                                // Giải phóng (BẮT BUỘC)
+                                imageProxy.close()
+                            }
+                        }
                     }
 
                     try {
