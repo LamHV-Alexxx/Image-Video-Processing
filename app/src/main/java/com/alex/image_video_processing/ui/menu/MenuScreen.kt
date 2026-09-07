@@ -22,8 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.alex.image_video_processing.ui.camerax.CameraScreen
 
-private enum class Feature(val label: String) {
+enum class Feature(val label: String) {
     Camera("CameraX — preview + phân tích khung hình 📷"),
+    ImageProcessing("ImageProcessing"),
 }
 
 @Composable
@@ -39,7 +40,8 @@ fun MenuScreen(modifier: Modifier = Modifier) {
 
     when (current) {
         null -> FeatureMenu(modifier = modifier.then(content), onSelect = { current = it })
-        Feature.Camera -> CameraScreen()
+        Feature.Camera -> CameraScreen(feature = current!!)
+        Feature.ImageProcessing -> CameraScreen(feature = current!!)
     }
 }
 

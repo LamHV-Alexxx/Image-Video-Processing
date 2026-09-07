@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.alex.image_video_processing.ui.camerax.components.CameraPreviewScreen
+import com.alex.image_video_processing.ui.menu.Feature
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -36,7 +37,10 @@ import java.util.concurrent.Executors
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun CameraScreen() {
+fun CameraScreen(
+    feature: Feature,
+    modifier: Modifier = Modifier,
+) {
     val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
 
     LaunchedEffect(Unit) {
@@ -45,10 +49,13 @@ fun CameraScreen() {
         }
     }
 
-    Surface(Modifier.fillMaxSize()) {
+    Surface(modifier.fillMaxSize()) {
         when {
             cameraPermissionState.status.isGranted ->
-                CameraPreviewScreen()
+                when(feature) {
+                    Feature.ImageProcessing -> ImageProcessingScreen()
+                    else -> CameraPreviewScreen()
+                }
 
             cameraPermissionState.status.shouldShowRationale ->
                 PermissionRequestContent {
