@@ -1,4 +1,4 @@
-package com.alex.image_video_processing.ui.opengl
+package com.alex.image_video_processing.ui.opengl.camera
 
 import android.graphics.SurfaceTexture
 import android.opengl.GLES11Ext

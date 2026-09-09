@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import com.alex.image_video_processing.ui.camerax.CameraScreen
 import com.alex.image_video_processing.ui.camerax.ImageProcessingScreen
 import com.alex.image_video_processing.ui.camerax.components.CameraPreviewScreen
-import com.alex.image_video_processing.ui.opengl.OpenGLCameraScreen
+import com.alex.image_video_processing.ui.opengl.camera.OpenGLCameraScreen
 
 enum class Feature(val label: String) {
     Camera("CameraX — preview"),

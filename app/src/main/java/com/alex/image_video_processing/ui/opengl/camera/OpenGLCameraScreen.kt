@@ -1,11 +1,10 @@
-package com.alex.image_video_processing.ui.opengl
+package com.alex.image_video_processing.ui.opengl.camera
 
 import android.opengl.GLSurfaceView
 import android.view.Surface
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
