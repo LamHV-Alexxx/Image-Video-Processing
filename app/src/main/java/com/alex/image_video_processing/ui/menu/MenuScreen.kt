@@ -21,10 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.alex.image_video_processing.ui.camerax.CameraScreen
+import com.alex.image_video_processing.ui.camerax.ImageProcessingScreen
+import com.alex.image_video_processing.ui.camerax.components.CameraPreviewScreen
+import com.alex.image_video_processing.ui.opengl.OpenGLCameraScreen
 
 enum class Feature(val label: String) {
-    Camera("CameraX — preview + phân tích khung hình 📷"),
+    Camera("CameraX — preview"),
     ImageProcessing("ImageProcessing"),
+    OpenGlCamera("OpenGL Camera"),
 }
 
 @Composable
@@ -40,8 +44,15 @@ fun MenuScreen(modifier: Modifier = Modifier) {
 
     when (current) {
         null -> FeatureMenu(modifier = modifier.then(content), onSelect = { current = it })
-        Feature.Camera -> CameraScreen(feature = current!!)
-        Feature.ImageProcessing -> CameraScreen(feature = current!!)
+        Feature.Camera -> CameraScreen(
+            content = { CameraPreviewScreen() }
+        )
+        Feature.ImageProcessing -> CameraScreen(
+            content = { ImageProcessingScreen() }
+        )
+        Feature.OpenGlCamera -> CameraScreen(
+            content = { OpenGLCameraScreen() }
+        )
     }
 }
 
